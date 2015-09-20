@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link rel="stylesheet" href="js/libs/bootstrap-modal/bootstrap-modal.css">
+
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="js/libs/bootstrap-modal/bootstrap-modal.pack.js"></script>
+
+
+
+    </head>
+    <body>
+        <div class="jumbotron">
+            <h1 class="text-info text-center">
+                Address Book
+            </h1>
+        </div>
+        <div class="col-lg-1"></div>
+        <div class="col-lg-8">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Number</th>
+                        <th>Street</th>
+                        <th>Suburb</th>
+                        <th>State</th>                    
+                    </tr>
+                </thead>
+                <tr>
+                    <td class="editformfield" >
+                        Mehran
+                    </td>
+                    <td class="editformfield" >
+                        Dowlat
+                    </td>
+                    <td class="editformfield" >
+                        1337
+                    </td>
+                    <td class="editformfield" >
+                        Walker
+                    </td>
+                    <td class="editformfield" >
+                        North Sydney
+                    </td>
+                    <td class="editformfield" >
+                        NSW
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-info btn-lg btn-block" data-toggle="modal" data-target="#editModal" onclick="$.initAddressBookFields(this)" >Edit</button>
+                        <button class="btn-block">Delete</button>
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+        <!-- Modal -->
+        <div id="editModal" class="modal fade"  role="dialog">
+            <div class="modal-dialog">
+
+                <form id="editmodalform" role="form">
+                    <div class="form-group">
+                        <label for="edformfirstname">First Name:</label>
+                        <input type="text" required class="form-control modaleditformfields" id="edformfirstname">
+                    </div>
+                    <div class="form-group">
+                        <label for="edformlastname">Last Name:</label>
+                        <input type="text" required class="form-control modaleditformfields" id="edformlastname">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edformnumber">Number:</label>
+                        <input type="number" required class="form-control modaleditformfields" id="edformnumber">
+                    </div>
+                    <div class="form-group">
+                        <label for="edformstreet">Street:</label>
+                        <input type="text" class="form-control modaleditformfields" id="edformstreet">
+                    </div>
+                    <div class="form-group">
+                        <label for="edformsuburb">Suburb:</label>
+                        <input type="text" class="form-control modaleditformfields" id="edformsuburb">
+                    </div>
+                    <div class="form-group">
+                        <label for="edformstate">State:</label>
+                        <select required class="selected form-control modaleditformfields" id="edformstate">
+                            <option></option>
+                            <option>NSW</option>
+                            <option>VIC</option>
+                            <option>QLD</option>
+                            <option>WA</option>
+                            <option>NT</option>
+                        </select>
+                    </div>
+                    <div>
+                    <button id="editmodalformsubmit" type="submit" class="btn btn-default">Submit</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                
+
+                $.initAddressBookFields = function initFields(e) {
+                    var fields = [];
+                    var formfields =[];
+                    var cc=e.parentElement.parentElement.childNodes;
+                    $.each(cc, function () {               // Visits every single <td> element
+                        var el = $(this)[0];
+                        var uu = el.textContent.trim();
+                        if (el.className==="editformfield") {
+                            fields.push(uu);
+                            formfields.push(el);
+                            
+                        }        // Prints out the text within the <td>
+                    });
+                    $.addressbookformfields = fields;
+                    $.addressbookrowfields = formfields;
+                };
+                $('#editModal').on('show.bs.modal', function (e) {
+                    var ffs=$('.modaleditformfields');//modal form fields
+                    var k=0;
+                    $.each(ffs, function (){
+                        var uu =$(this)[0];
+                        var txt = $.addressbookformfields[k++];
+                        uu.value = txt;
+                    });
+                });
+                $('#editmodalformsubmit').on('click', function(){
+                    
+                    //TODO send ajax to save the changes if any
+                    var ffs=$('.modaleditformfields');//modal form fields
+                    var k=0;
+                    $.modalformfields = [];
+
+                    for(k=0; k<ffs.length; k++){
+                        var uu = ffs[k];
+                        var tff = $.addressbookrowfields[k];
+                        tff.innerHTML = uu.value;
+                        $.modalformfields.push(uu.value);
+                    }
+                    
+                    console.log('updated first name = '+ffs[0].value);
+                    console.log('updated last  name = '+ffs[1].value);
+                });
+                
+                $('#editModal').on('hidden.bs.modal', function(){
+                    var ffs=$('.modaleditformfields');//modal form fields
+                    var k=0;
+                    for(k=0; k<ffs.length; k++){
+                        var uu = ffs[k];
+                        var tff = $.addressbookrowfields[k];
+                        tff.innerHTML = uu.value;
+                    }
+                    console.log('updated first name = '+ffs[0].value);
+                    console.log('updated last  name = '+ffs[1].value);
+                });
+                $('#filltableform').on('click', function(){
+                    
+                    
+                });
+            })
+        </script>
+
+    </body>
+</html>
