@@ -119,32 +119,23 @@ $(document).ready(function () {
     $('#editmodalformsubmit').on('click', function () {
 
         //TODO send ajax to save the changes if any
-        var ffs = $('.modaleditformfields');//get modal form fields
-        var k = 0;
-
-
-        for (k = 0; k < ffs.length; k++) {
-            var uu = ffs[k];
-            var tff = $.addressbookrowfields[k];
-            tff.innerHTML = uu.value;
-
-        }
+        var ffs = $("#editmodalform").serializeArray();
         //find selected state option
         var state_option = $("#edformstate").find(":selected");
 
         var reqdata = {
             id: $.contactrow.getAttribute('contact_id'),
-            first_name: ffs[0].value,
-            last_name: ffs[1].value,
-            number: ffs[2].value,
-            street: ffs[3].value,
-            suburb: ffs[4].value,
+            first_name: ffs[0].value.trim(),
+            last_name: ffs[1].value.trim(),
+            number: ffs[2].value.trim(),
+            street: ffs[3].value.trim(),
+            suburb: ffs[4].value.trim(),
             state: state_option.attr('state_id'),
             update_contact: 'update'
         };
+       
 
-        jQuery.fn.extend({
-            upd_contact: $.ajax({
+        $.ajax({
                 type: 'POST',
                 url: "addrbook.php",
                 dataType: 'json',
@@ -158,8 +149,6 @@ $(document).ready(function () {
                     console.log('post Error ' + textStatus);
                 }
             })
-        });
-        $.upd_contact();
         //console.log('updated first name = ' + ffs[0].value);
         //console.log('updated last  name = ' + ffs[1].value);
         //return;
