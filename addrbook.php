@@ -6,26 +6,20 @@ require_once(dirname(__FILE__) . '/config/Config.php');
  * 
  * @return boolean|array
  */
-function getAllContacts_old() {
-    $qs = "select * from addrbook.contacts as yd";
-    $qresult = mysql_query($qs);
-    if (!$qresult) {
-        return false;
-    }
-    $nrows = mysql_num_rows($qresult);
-    if (!$nrows) {
-        return false;
-    }
-    $all_contacts = array();
-    $row = NULL;
-    while ($row = mysql_fetch_row($qresult)) {
-        array_push($all_contacts, $row);
-    }
-    return $all_contacts;
-}
+
 
 function getAllContacts() {
     $qs = "select * from addrbook.contacts as yd";
+    $db = getDBConnection();
+    try {
+        $stmt = $db->query($qs);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $ex) {
+        false;
+    }
+}
+function getAllStates(){
+    $qs = "select * from addrbook.states as yd";
     $db = getDBConnection();
     try {
         $stmt = $db->query($qs);
@@ -65,7 +59,7 @@ function addUpdateContact($json_contact) {
         return $ex->getMessage();
     }
 }
-
+//test1 
 function test1(){
     $contacts = getAllContacts();
     $jsnr = json_encode($contacts);
@@ -73,7 +67,42 @@ function test1(){
     $js = '["Mehran 5","Dowlat 5","195","walker","sub 1","3"]';
     //echo $js;
     echo addUpdateContact($js);
-
 }
+function update_contact($c){
+	$db = getDBConnection();
+    $sql = "UPDATE contacts SET "
+                . "first_name= '" . $c['first_name']
+                . "',last_name= '" . $c['last_name']
+                . "',number= '" . $c['number']
+                . "',street= '" . $c['street']
+                . "',suburb= '" . $c['suburb']
+                . "',state= '" . $c['state']
+                . "' WHERE id=" . $c['id'];
+    try {
+        $db->exec($sql);
+        return $db->lastInsertId();
+    } catch (Exception $ex) {
+        return $ex->getMessage();
+    }
+}
+//&& ($_GET['initpage'])
+//if (isset($_GET) && ($_GET['initpage']) ) {
+if (isset($_GET) && isset($_REQUEST['load_page']) ) {
+    $contacts = getAllContacts();
+    $states = getAllStates();
+    $ja = array();
+    array_push($ja, $contacts, $states);
+    $jsnr = json_encode($ja);
+    echo $jsnr;
+    return;
+}
+
+if (isset($_POST) && isset($_REQUEST['update_contact']) ){    
+    $ra =$_REQUEST;
+    echo "id=".update_contact($ra);
+    //echo json_encode($ra['id'].";".$ra['first_name']);
+    return;
+}
+
 
 ?>
