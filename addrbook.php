@@ -1,13 +1,13 @@
 <?php
 
 require_once(dirname(__FILE__) . '/config/Config.php');
-
+//=========================================
+///methods for updating or data retrieving 
+//========================================
 /**
- * 
+ * returns all contacts and their unique ids
  * @return boolean|array
  */
-
-
 function getAllContacts() {
     $qs = "select * from addrbook.contacts as yd";
     $db = getDBConnection();
@@ -18,7 +18,11 @@ function getAllContacts() {
         false;
     }
 }
-function getAllStates(){
+
+/*
+ * returns a stateid:state name array
+ */
+function getAllStates() {
     $qs = "select * from addrbook.states as yd";
     $db = getDBConnection();
     try {
@@ -29,38 +33,11 @@ function getAllStates(){
     }
 }
 
-/**
- * 
- * @param type $contact
+/*
+ * used for test of adding contacts to the database
  */
-function addUpdateContact($json_contact) {
-    $c = json_decode($json_contact);
-    $sql = "SQL is empty sz=" . sizeof($c);
-    $db = getDBConnection();
-    if (sizeof($c) == 6) {
-        $sql = "INSERT INTO contacts (
-            first_name, last_name, number, street, suburb, state)
-            VALUES ('" . $c[0] . "','" . $c[1] . "','" . $c[2] . "','" . $c[3] . "','" . $c[4] . "','" . $c[5] . "')";
-    } elseif (sizeof($c) == 7) {
 
-        $sql = "UPDATE contacts SET "
-                . "first_name= '" . $c[1]
-                . "',last_name= '" . $c[2]
-                . "',number= '" . $c[3]
-                . "',street= '" . $c[4]
-                . "',suburb= '" . $c[5]
-                . "',state= '" . $c[6]
-                . "' WHERE id=" . $c[0];
-    }
-    try {
-        $db->exec($sql);
-        return $db->lastInsertId();
-    } catch (Exception $ex) {
-        return $ex->getMessage();
-    }
-}
-//test1 
-function test1(){
+function test1() {
     $contacts = getAllContacts();
     $jsnr = json_encode($contacts);
     echo $jsnr;
@@ -68,16 +45,18 @@ function test1(){
     //echo $js;
     echo addUpdateContact($js);
 }
-function update_contact($c){
-	$db = getDBConnection();
-    $sql = "UPDATE contacts SET "
-                . "first_name= '" . $c['first_name']
-                . "',last_name= '" . $c['last_name']
-                . "',number= '" . $c['number']
-                . "',street= '" . $c['street']
-                . "',suburb= '" . $c['suburb']
-                . "',state= '" . $c['state']
-                . "' WHERE id=" . $c['id'];
+
+function add_contact($c) {
+    $db = getDBConnection();
+    $sql = "INSERT INTO contacts (
+            first_name, last_name, number, street, suburb, state)
+            VALUES ('"
+            . $c['first_name'] . "','"
+            . $c['last_name'] . "','"
+            . $c['number'] . "','"
+            . $c['street'] . "','"
+            . $c['suburb'] . "','"
+            . $c['state'] . "')";
     try {
         $db->exec($sql);
         return $db->lastInsertId();
@@ -85,9 +64,41 @@ function update_contact($c){
         return $ex->getMessage();
     }
 }
+
+function update_contact($c) {
+    $db = getDBConnection();
+    $sql = "UPDATE contacts SET "
+            . "first_name= '" . $c['first_name']
+            . "',last_name= '" . $c['last_name']
+            . "',number= '" . $c['number']
+            . "',street= '" . $c['street']
+            . "',suburb= '" . $c['suburb']
+            . "',state= '" . $c['state']
+            . "' WHERE id=" . $c['id'];
+    try {
+        $db->exec($sql);
+        return $c['id'];
+    } catch (Exception $ex) {
+        return $ex->getMessage();
+    }
+}
+
+function delContactRow($c) {
+    $qs = "delete from addrbook.contacts where id=".$c['id'];
+    $db = getDBConnection();
+    try {
+        $db->query($qs);
+        return TRUE;        
+    } catch (Exception $ex) {
+        return FALSE;
+    }
+}
+////==================================================================================
+////======================================http request processing scripts=============
+////==================================================================================
 //&& ($_GET['initpage'])
 //if (isset($_GET) && ($_GET['initpage']) ) {
-if (isset($_GET) && isset($_REQUEST['load_page']) ) {
+if (isset($_GET) && isset($_REQUEST['load_page'])) {
     $contacts = getAllContacts();
     $states = getAllStates();
     $ja = array();
@@ -97,12 +108,35 @@ if (isset($_GET) && isset($_REQUEST['load_page']) ) {
     return;
 }
 
-if (isset($_POST) && isset($_REQUEST['update_contact']) ){    
-    $ra =$_REQUEST;
-    echo "id=".update_contact($ra);
+
+if (isset($_POST) && isset($_REQUEST['update_contact'])) {
+    $ra = $_REQUEST;
+    echo json_encode(update_contact($ra));
     //echo json_encode($ra['id'].";".$ra['first_name']);
     return;
 }
 
+if (isset($_POST) && isset($_REQUEST['add_new_ontact'])) {
+    $ra = $_REQUEST;
+    $result=array();
+    $result['id'] = add_contact($ra);
+    if ($result['id'] >=0){
+        $result['success'] = TRUE;
+    }else{
+        $result['success'] = FALSE;
+    }
+    echo json_encode($result);
+    //echo json_encode($ra['id'].";".$ra['first_name']);
+    return;
+}
 
+if (isset($_POST) && isset($_REQUEST['del_contact'])) {
+    $reqa = $_REQUEST;
+    $result=array();
+    $result['success']=  delContactRow($reqa); 
+    echo json_encode($result);
+    //echo json_encode($ra['id'].";".$ra['first_name']);
+    return;
+}
+echo json_encode('success without doing anything');
 ?>

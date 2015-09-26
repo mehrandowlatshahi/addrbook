@@ -13,11 +13,6 @@ and open the template in the editor.
         <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
         <link rel="stylesheet" href="js/libs/bootstrap-modal/bootstrap-modal.css">
 
-
-        
-
-
-
     </head>
     <body>
         <div class="jumbotron">
@@ -25,10 +20,17 @@ and open the template in the editor.
                 Address Book
             </h1>
         </div>
-        <div id="states_div" class="col-lg-1" style="display: none"></div>
-        <div class="col-lg-1" ></div>
-
+        <div class="col-lg-10"></div>
         <div class="col-lg-8">
+            <button id="addnewcontactbutton" class="btn-lg" 
+                    data-toggle="modal" data-target="#editModal"
+                    onclick="$.contactEditFormFields(this)">Add New Contact</button>
+        </div>
+
+        <div id="states_div" class="col-lg-1" style="display: none"></div>
+        <div class="col-lg-4" ></div>
+
+        <div class="col-lg-8" id="contact-page-selection">
             <table id="contacts_table" class="table table-striped" data-height="300" data-pagination="true">
                 <thead>
                     <tr>
@@ -43,55 +45,65 @@ and open the template in the editor.
                 <tr></tr>
 
             </table>
+
+            <script>
+                // init bootpag
+                $('#contact-page-selection').bootpag({
+                    total: 2
+                }).on("page", function (event, /* page number here */ num) {
+                    $("#contacts_table").html("Insert content"); // some ajax content loading...
+                });
+            </script>
         </div>
-        <div class="col-lg-2"></div>
-        <div class="col-lg-8">
-            <button id="addnewcontactform" class="btn-lg">Add New Contact</button>
-        </div>
+
         <!-- Modal -->
-        <div id="editModal" class="modal fade"  role="dialog">
+        <div id="editModal" class="modal fade" data-dismiss="modal" role="dialog">
             <div class="modal-dialog">
 
-                <form id="editmodalform" role="form">
+                <form id="editmodalform" role="form" action="addrbook.php" method="POST">
                     <div class="form-group">
                         <label for="edformfirstname">First Name:</label>
-                        <input name='first_name' type="text" required class="form-control modaleditformfields" id="edformfirstname">
+                        <input name='first_name' type="text" class="form-control modaleditformfields" id="edformfirstname" required>
                     </div>
                     <div class="form-group">
                         <label for="edformlastname">Last Name:</label>
-                        <input name='last_name' type="text" required class="form-control modaleditformfields" id="edformlastname">
+                        <input name='last_name' type="text" class="form-control modaleditformfields" id="edformlastname" required>
                     </div>
 
                     <div class="form-group">
                         <label for="edformnumber">Number:</label>
-                        <input name='number' type="number" required class="form-control modaleditformfields" id="edformnumber">
+                        <input name='number' type="number" class="form-control modaleditformfields" id="edformnumber" required>
                     </div>
                     <div class="form-group">
                         <label for="edformstreet">Street:</label>
-                        <input name='street' type="text" class="form-control modaleditformfields" id="edformstreet">
+                        <input name='street' type="text" class="form-control modaleditformfields" id="edformstreet" >
                     </div>
                     <div class="form-group">
                         <label for="edformsuburb">Suburb:</label>
-                        <input name='suburb' type="text" class="form-control modaleditformfields" id="edformsuburb">
+                        <input name='suburb' type="text" class="form-control modaleditformfields" id="edformsuburb" >
                     </div>
                     <div class="form-group">
                         <label for="edformstate">State:</label>
-                        <select name='state' required class="selected form-control modaleditformfields" id="edformstate">
+                        <select name='state'  class="selected form-control modaleditformfields" id="edformstate" required>
                             <option></option>
 
                         </select>
                     </div>
-                    <div>
-                        <button id="editmodalformsubmit" type="submit" class="btn btn-default">Submit</button>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+                        <button type="submit" class="btn btn-default" id="editmodalformsubmit" >Submit</button>
                     </div>
                 </form>
 
             </div>
         </div>
-        
+
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
         <script src="js/libs/bootstrap-modal/bootstrap-modal.pack.js"></script>
+        <script src="//raw.github.com/botmonster/jquery-bootpag/master/lib/jquery.bootpag.min.js"></script>
         <script src="js/addrbook.js"></script>
 
     </body>
