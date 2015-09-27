@@ -64,6 +64,9 @@ $(document).ready(function () {
 
                 $("#contacts_table > tbody:last").append(nr);
             });
+            if (rows.length>1){//TODO find a proper fix delete the dummy row for now
+                $("#contacts_table")[0].deleteRow(0);
+            }
             TBL.paginate(5);
         }
     });
@@ -157,10 +160,11 @@ $(document).ready(function () {
      */
     $.clear_modal_form_fields = function () {
         var ffs = $('.modaleditformfields');//modal form fields
+        
         var k = 0;
         $.each(ffs, function () {
             var uu = $(this)[0];
-            uu.value = '';
+            uu.value = "";
         });
     };
     /*
@@ -209,13 +213,14 @@ $(document).ready(function () {
      *
      */
     $('#editmodalform').on('click', '#editmodalformsubmit', function (e) {
-
+        
         e.preventDefault();
         //TODO send ajax to save the changes if any
         var ffs = $("#editmodalform").serializeArray();
+        var fields = $(".modaleditformfields");
         //find selected state option
         var state_option = $("#edformstate").find(":selected");
-
+        
         if ($.update_contact) {
             $.update_contact_post_req(e, ffs, state_option);
             return;
@@ -261,8 +266,7 @@ $(document).ready(function () {
         });
     };
 
-    $.add_contact_post_req = function (e, ffs, state_option) {
-
+    $.add_contact_post_req = function (e, ffs, state_option) {        
         var reqdata = {
             first_name: ffs[0].value.trim(),
             last_name: ffs[1].value.trim(),
@@ -272,7 +276,7 @@ $(document).ready(function () {
             state: state_option.attr('state_id'),
             add_new_ontact: 'add'
         };
-
+        $('body').show()
         
         $.ajax({
             type: 'POST',
@@ -388,6 +392,8 @@ $(document).ready(function () {
         };
         
     };
+    
+    
 
 
 });
