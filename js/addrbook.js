@@ -221,6 +221,23 @@ $(document).ready(function () {
         //find selected state option
         var state_option = $("#edformstate").find(":selected");
         
+        //validate form inputs 
+        var invalid=false;
+        $.each(fields, function(){
+            var uu = $(this)[0];
+            var attr = $(this).attr('required');
+           if(uu.value.length <1 && attr==='required'){
+               alert("please enter a valid "+uu.attributes['name'].value);
+               invalid=true;
+               return false;
+               
+           } 
+        });
+       
+       if(invalid){
+            return;
+        }
+        
         if ($.update_contact) {
             $.update_contact_post_req(e, ffs, state_option);
             return;
