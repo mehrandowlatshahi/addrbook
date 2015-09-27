@@ -31,20 +31,29 @@ and open the template in the editor.
         <div class="col-lg-4" ></div>
 
         <div class="col-lg-8" id="contact-page-selection">
-            <table id="contacts_table" class="table table-striped" data-height="300" data-pagination="true">
-                <thead>
-                    <tr>
-                        <th>First Name</th>
-                        <th>Last Name</th>
-                        <th>Number</th>
-                        <th>Street</th>
-                        <th>Suburb</th>
-                        <th>State</th>                    
-                    </tr>
-                </thead>
-                <tr></tr>
+            <div id="paginate_div">
+                <ul class="pagination" id="paginate_ul"> 
+                    <li id="prev_pg_nav"><a href="#">&laquo;</a></li> 
+                    <li ><a href="#" id="current_contact_page">1</a></li>
+                    <li id="next_pg_nav"><a href="#" >&raquo;</a></li> 
+                </ul>
+            </div>
+            <div id="contact_table_div">
+                <table id="contacts_table" class="table table-striped" data-height="300" data-pagination="true">
+                    <thead>
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Number</th>
+                            <th>Street</th>
+                            <th>Suburb</th>
+                            <th>State</th>                    
+                        </tr>
+                    </thead>
+                    <tr></tr>
 
-            </table>
+                </table>
+            </div>
 
             <script>
                 // init bootpag
@@ -103,7 +112,6 @@ and open the template in the editor.
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
         <script src="js/libs/bootstrap-modal/bootstrap-modal.pack.js"></script>
-        <script src="//raw.github.com/botmonster/jquery-bootpag/master/lib/jquery.bootpag.min.js"></script>
         <script src="js/addrbook.js"></script>
 
     </body>

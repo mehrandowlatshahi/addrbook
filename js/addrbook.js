@@ -1,5 +1,5 @@
 $(document).ready(function () {
-
+    var addrbook = {};
     /*
      * template for each contact row
      */
@@ -14,7 +14,7 @@ $(document).ready(function () {
             'data-toggle="modal" data-target="#editModal" onclick="$.contactEditFormFields(this)" >Edit</button>' +
             '<button class="btn-block" onclick="$.del_contact(this)">Delete</button></td></tr>';
 
-
+    
     /**Creates the table of contacts:
      * sends a get all contacts and all states requests to the backend &
      * creates the table of contacts based on the received contacts
@@ -64,9 +64,10 @@ $(document).ready(function () {
 
                 $("#contacts_table > tbody:last").append(nr);
             });
+            TBL.paginate(5);
         }
     });
-    
+
 
     /*
      * Creates mapping dtring for state name to corresponding id
@@ -82,7 +83,24 @@ $(document).ready(function () {
         var ss = stateidmap.substring(sti);
         var state = ss.split(",")[0].split("__")[1];
         return state;
-    }
+    };
+    /**
+     * 
+     * @param {type} nm:state_name
+     * @returns state id for the given state name
+     */
+    addrbook.mapStateName2StateID = function (nm) {
+        var stateidmap = $("#states_div").text();
+        var sti = stateidmap.indexOf("__"+nm);
+        if (sti < 0) {
+            return NULL;
+        }
+        var ss = stateidmap.substring(0,sti);
+        
+        var states = ss.split(",");
+        var state = states[states.length-1];
+        return state;
+    };
 
     /*
      * This method is called for both add new content and edit existing content
@@ -92,7 +110,7 @@ $(document).ready(function () {
      * @returns {void}
      */
     $.contactEditFormFields = function initFields(e) {
-        if(e.textContent==="Add New Contact"){
+        if (e.textContent === "Add New Contact") {
             $.clear_modal_form_fields();
             $.update_contact = false;
             return;
@@ -116,14 +134,14 @@ $(document).ready(function () {
         $.fill_modal_form_fields(fields);
         $.addressbookformfieldvalues = fields;
         $.addressbookrowfields = formfields;
-        
+
     };
     /*
      * 
      * @param {type} fields
      * @returns void
      */
-    $.fill_modal_form_fields = function(fields){
+    $.fill_modal_form_fields = function (fields) {
         var ffs = $('.modaleditformfields');//modal form fields
 
         var k = 0;
@@ -137,14 +155,14 @@ $(document).ready(function () {
      * clears modal form before being shown
      * @returns {undefined}
      */
-    $.clear_modal_form_fields = function(){
+    $.clear_modal_form_fields = function () {
         var ffs = $('.modaleditformfields');//modal form fields
         var k = 0;
         $.each(ffs, function () {
-            var uu = $(this)[0];            
+            var uu = $(this)[0];
             uu.value = '';
         });
-    }
+    };
     /*
      * updates selected row (saved when a row edit button 
      * is clicked) using the form fields (in ffs)
@@ -159,8 +177,7 @@ $(document).ready(function () {
             gch.textContent = ffs[k].value.trim();
 
         }
-        ;
-    }
+    };
     /**
      * Adds a new contact 
      * @param {type} ffs
@@ -170,20 +187,21 @@ $(document).ready(function () {
     $.add_new_contact = function (ffs, id) {
         var nr = $.contact_row_template;
         nr = nr.replace('contact_tempid', id);//record contact id from contacs table
-        nr = nr.replace('fname', ffs['first_name']);
-        nr = nr.replace('lname', ffs['last_name']);
-        nr = nr.replace('number__', ffs['number']);
-        nr = nr.replace('street__', ffs['street']);
-        nr = nr.replace('suburb__', ffs['suburb']);
+        nr = nr.replace('fname', ffs[0].value);
+        nr = nr.replace('lname', ffs[1].value);
+        nr = nr.replace('number__', ffs[2].value);
+        nr = nr.replace('street__', ffs[3].value);
+        nr = nr.replace('suburb__', ffs[4].value);
 
-        nr = nr.replace("tempid", ffs['state']);//record state id from states table
+        var state_id = addrbook.mapStateName2StateID(ffs[5].value);//
+        nr = nr.replace("tempid", state_id);//record state id from states table
 
-        var state = $.mapStateID2StateName(this.state);
-        nr = nr.replace('state__', state);
-        $("#contacts_table > tbody:last").append(nr);
-       // nr.insertBefore('table > tbody > tr:first')
+        nr = nr.replace('state__', ffs[5].value);//insert state name in the row
+        $("#contacts_table > tbody:last").append(nr);//add contact row to the bottom of the row
+        TBL.Contact_Update();
+        // nr.insertBefore('table > tbody > tr:first')
         //$("#contacts_table > tbody:first").append(nr);
-    }
+    };
     /*
      * submits the modal form to the backend
      * sends update request if edit button pressed
@@ -196,22 +214,22 @@ $(document).ready(function () {
         //TODO send ajax to save the changes if any
         var ffs = $("#editmodalform").serializeArray();
         //find selected state option
-        var state_option = $("#edformstate").find(":selected");  
-        
-        if ($.update_contact ){
-            $.update_contact_post_req(e,ffs, state_option);
+        var state_option = $("#edformstate").find(":selected");
+
+        if ($.update_contact) {
+            $.update_contact_post_req(e, ffs, state_option);
             return;
-        } else{
-            $.add_contact_post_req(e,ffs, state_option);
+        } else {
+            $.add_contact_post_req(e, ffs, state_option);
             return;
         }
-                
+
         //console.log('updated first name = ' + ffs[0].value);
         //console.log('updated last  name = ' + ffs[1].value);
 
     });
-    
-    $.update_contact_post_req = function(e, ffs, state_option){
+
+    $.update_contact_post_req = function (e, ffs, state_option) {
         var reqdata = {
             id: $.contactrow.getAttribute('contact_id'),
             first_name: ffs[0].value.trim(),
@@ -230,7 +248,7 @@ $(document).ready(function () {
             dataType: 'json',
             data: reqdata,
             cache: false,
-            success: function (data) {                
+            success: function (data) {
                 console.log('Inside post update success = ' + data);
                 $("#editModal").hide();
                 $.upd_selectedrow(ffs);
@@ -241,9 +259,9 @@ $(document).ready(function () {
                 console.log('post Error ' + textStatus);
             }
         });
-    }
+    };
 
-    $.add_contact_post_req = function(e, ffs, state_option){
+    $.add_contact_post_req = function (e, ffs, state_option) {
 
         var reqdata = {
             first_name: ffs[0].value.trim(),
@@ -255,7 +273,7 @@ $(document).ready(function () {
             add_new_ontact: 'add'
         };
 
-
+        
         $.ajax({
             type: 'POST',
             url: "addrbook.php",
@@ -265,7 +283,9 @@ $(document).ready(function () {
             success: function (data) {
                 console.log('Inside post add success = ' + data);
                 $("#editModal").hide();
-                $.add_new_contact(ffs,data);
+                if (data['success']) {
+                    $.add_new_contact(ffs, data);
+                }
                 //$.initpage();
 
             },
@@ -275,14 +295,14 @@ $(document).ready(function () {
         });
 
     }
-    
+
     /*
      * deletes the selected contact
      */
-    $.del_contact = function(delbutton){
+    $.del_contact = function (delbutton) {
         var row = delbutton.parentElement.parentElement;
         var rid = row.getAttribute('contact_id');
-        var reqdata = {id:rid, del_contact:'del_contact'};
+        var reqdata = {id: rid, del_contact: 'del_contact'};
         $.ajax({
             type: 'POST',
             url: "addrbook.php",
@@ -292,15 +312,82 @@ $(document).ready(function () {
             success: function (data) {
                 console.log('Inside post delete success = ' + data);
                 row.remove();
+                TBL.Contact_Update();
                 return true;
-                
+
             },
             error: function (xhr, textStatus, errorThrown) {
                 console.log('post Error ' + textStatus);
                 return false;
             }
         });
-    }
+    };
+    
+    var TBL = {};
+    
+    TBL.pagination_li_template = '<li id="contact_page_number"><a href="#">page_number</a></li>';    
+    TBL.paginate = function(PG_LEN){
+        var tbl = $("#contacts_table");
+        var rows = tbl.find('tbody > tr');
+        var num_pages = Math.ceil(rows.length/PG_LEN)-1;
+        var current = 0;
+        
+        var pgnav = $("#paginate_ul");
+        var prev_nav = $("#prev_pg_nav");
+        var next_nav = $("#next_pg_nav");
+        var cur_page = $("#current_contact_page")
+        
+        prev_nav.addClass('disabled').click(function (){
+            pagination('<');
+        });
+        next_nav.click(function(){
+            pagination('>');
+        });
+        
+        //======= Show Initial rows
+        
+        rows.hide().slice(0, PG_LEN).show();
+        
+        pagination = function (direction) {
+            var reveal = function (current) {
+                prev_nav.addClass('disabled');
+                next_nav.addClass('disabled');
+                rows
+                        .hide()
+                        .slice(current*PG_LEN, current*PG_LEN + PG_LEN)
+                        .show();
+                cur_page.text(current+1);                
+            };
+            if (direction =="<"){//previous
+                next_nav.addClass('active');
+                if(current>1){
+                    current -=1;
+                }else if (current ==1){
+                    prev_nav.addClass('disabled');
+                    current=0;
+                }
+            }else {//next page
+                prev_nav.addClass('active');
+                if (current < num_pages-1){
+                    current +=1;                    
+                }else if(current ==num_pages-1){
+                    current = num_pages;
+                    next_nav.addClass('disabled');
+                }
+            }
+            reveal(current);
+        };
+        
+        TBL.Contact_Update = function(){
+            next_nav.addClass('disabled');
+            prev_nav.addClass('active');
+            rows = tbl.find('tbody > tr');
+            num_pages  = Math.ceil(rows.length/PG_LEN)-1;
+            current = num_pages-1;
+            pagination('>');                        
+        };
+        
+    };
 
 
 });
